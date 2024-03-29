@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+</head>
+
+<body>
+    <input type="text" id="message" placeholder="Ketik pesan...">
+    <button onclick="sendMessage()">Kirim</button>
+    <ul id="chat"></ul>
+
+    <script>
+        const chat = document.getElementById('chat');
+
+        // Buat koneksi ke server WebSocket
+        const socket = new WebSocket('ws://localhost:8000');
+
+        // Event listener ketika koneksi terbuka
+        socket.onopen = function (event) {
+            console.log('Terhubung ke server WebSocket');
+        };
+
+        // Event listener ketika menerima pesan dari server
+        socket.onmessage = function (event) {
+            const message = document.createElement('li');
+            message.textContent = event.data;
+            chat.appendChild(message);
+        };
+
+        // Fungsi untuk mengirim pesan ke server
+        function sendMessage() {
+            const messageInput = document.getElementById('message');
+            const message = messageInput.value;
+            socket.send(message);
+            messageInput.value = '';
+        }
+    </script>
+</body>
+
+</html>

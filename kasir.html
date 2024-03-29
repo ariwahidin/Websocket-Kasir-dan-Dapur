@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir</title>
+</head>
+
+<body>
+    <h1>Kasir</h1>
+    <!-- Formulir untuk memasukkan pesanan -->
+    <form id="orderForm">
+        <label for="tableNumber">Nomor Meja:</label>
+        <input type="text" id="tableNumber" name="tableNumber"><br><br>
+        <label for="items">Pesanan:</label>
+        <input type="text" id="items" name="items"><br><br>
+        <label for="specialInstructions">Instruksi Khusus:</label>
+        <input type="text" id="specialInstructions" name="specialInstructions"><br><br>
+        <button type="button" onclick="sendOrder()">Kirim Pesanan</button>
+    </form>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:8000/kasir');
+
+        socket.onopen = function (event) {
+            console.log('Terhubung ke server WebSocket');
+        };
+
+        function sendOrder() {
+            const tableNumber = document.getElementById('tableNumber').value;
+            const items = document.getElementById('items').value;
+            const specialInstructions = document.getElementById('specialInstructions').value;
+
+            const order = {
+                tableNumber: tableNumber,
+                items: items,
+                specialInstructions: specialInstructions
+            };
+
+            socket.send(JSON.stringify(order));
+        }
+    </script>
+</body>
+
+</html>

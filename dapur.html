@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dapur</title>
+</head>
+
+<body>
+    <h1>Dapur</h1>
+    <!-- Area untuk menampilkan pesanan yang masuk -->
+    <div id="orders"></div>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:8000/dapur');
+
+        socket.onopen = function (event) {
+            console.log('Terhubung ke server WebSocket');
+        };
+
+        socket.onmessage = function (event) {
+            const order = JSON.parse(event.data);
+            const orderDetails = `Meja: ${order.tableNumber}, Pesanan: ${order.items}, Instruksi Khusus: ${order.specialInstructions}`;
+
+            // Tampilkan pesanan yang masuk di dapur
+            const ordersDiv = document.getElementById('orders');
+            ordersDiv.innerHTML += `<p>${orderDetails}</p>`;
+        };
+    </script>
+</body>
+
+</html>
