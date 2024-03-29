@@ -1,32 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dapur</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
 </head>
 
 <body>
-    <h1>Dapur</h1>
-    <!-- Area untuk menampilkan pesanan yang masuk -->
-    <div id="orders"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col col-md-12">
+                <h1>Dapur</h1>
 
+
+
+                <div id="orders"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
     <script>
-        const socket = new WebSocket('ws://localhost:8000/dapur');
+        $(document).ready(function () {
+            const socket = new WebSocket('ws://localhost:8000/dapur');
+            socket.onopen = function (event) {
+                console.log('Terhubung ke server WebSocket');
+            };
+            getOrder();
+            socket.onmessage = function (event) {
+                getOrder();
+                // const order = JSON.parse(event.data);
+                // const card = `<div class="card mb-2">
+                //                     <div class="card-header">
+                //                         Meja : ${order.tableNumber}
+                //                     </div>
+                //                     <div class="card-body">
+                //                         <h5 class="card-title">${order.items}</h5>
+                //                         <p class="card-text">${order.specialInstructions} <span></p>
+                //                         <a href="#" class="btn btn-primary">Selesaikan pesanan</a>
+                //                     </div>
+                //                 </div>`;
+                // const orderDetails = `Meja: ${order.tableNumber}, Pesanan: ${order.items}, Instruksi Khusus: ${order.specialInstructions}`;
+                // // Tampilkan pesanan yang masuk di dapur
+                // const ordersDiv = $('#orders');
+                // ordersDiv.append(card);
+                // ordersDiv.innerHTML += `<p>${orderDetails}</p>`;
+            };
 
-        socket.onopen = function (event) {
-            console.log('Terhubung ke server WebSocket');
-        };
+            $('#orders').on('click', '.btnDone', function () {
+                let id = $(this).data('id');
+                $.post('kasirController.php', { order_done: true, id: id }, function (response) {
+                    if (response.success == true) {
+                        getOrder();
+                    }
+                }, 'json');
+            });
 
-        socket.onmessage = function (event) {
-            const order = JSON.parse(event.data);
-            const orderDetails = `Meja: ${order.tableNumber}, Pesanan: ${order.items}, Instruksi Khusus: ${order.specialInstructions}`;
-
-            // Tampilkan pesanan yang masuk di dapur
-            const ordersDiv = document.getElementById('orders');
-            ordersDiv.innerHTML += `<p>${orderDetails}</p>`;
-        };
+            function getOrder() {
+                $.post('kasirController.php', { get_order: true }, function (response) {
+                    if (response.success == true) {
+                        let order = response.data;
+                        const ordersDiv = $('#orders');
+                        ordersDiv.empty();
+                        order.forEach(element => {
+                            const card = `<div class="card mb-2">
+                                    <div class="card-header">
+                                        Meja : ${element.no_meja}
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">${element.pesanan}</h5>
+                                        <p class="card-text">${element.intruksi} <span></p>
+                                        <button class="btn btn-primary btnDone" data-id="${element.id}">Selesaikan pesanan</button>
+                                    </div>
+                                </div>`;
+                            ordersDiv.append(card);
+                        });
+                    }
+                }, 'json');
+            }
+        });
     </script>
 </body>
 
